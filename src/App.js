@@ -1092,7 +1092,7 @@ const ProjectsSection = () => {
       description: 'Full-stack web application for UI/UX analysis through interactive heatmaps that track user behavior (clicks, scrolls) to optimize interface design.',
       tech: ['React', 'Node.js', 'MongoDB', 'Express', 'Heatmap.js', 'D3.js'],
       status: 'Final Year Project',
-      image: '/images/Screenshot 2025-07-15 140419.png', // Image from public/images
+      image: '/images/Screenshot 2025-07-15 140419.png',
       link: 'https://aurax.info/',
       details: {
         period: 'Jul 2024 - May 2025',
@@ -1111,7 +1111,7 @@ const ProjectsSection = () => {
       description: 'Professional website for a premium salon & spa, featuring service listings, online booking, and gallery showcase.',
       tech: ['WordPress', 'Elementor', 'WooCommerce', 'PHP'],
       status: 'Live',
-      image: '/images/WhatsApp Image 2024-10-26 at 8.06.39 PM.jpeg', // Image from public/images
+      image: '/images/WhatsApp Image 2024-10-26 at 8.06.39 PM.jpeg',
       link: 'https://www.vanitysalons.pk/',
       details: {
         period: '2023',
@@ -1126,13 +1126,26 @@ const ProjectsSection = () => {
         ]
       }
     },
-    // {
-    //   title: 'Design System',
-    //   description: 'Comprehensive UI component library',
-    //   tech: ['React', 'Storybook', 'Figma'],
-    //   status: 'Featured',
-    //   image: '/images/design-system-screenshot.jpg' // Image from public/images
-    // }
+    {
+      title: 'Lush Looks Salon - React Website',
+      description: 'A responsive and fully animated salon website built with React and CSS Modules. Includes booking, service menu, testimonials, and smooth scroll animations.',
+      tech: ['React', 'CSS Modules', 'AOS', 'Vite', 'Vercel'],
+      status: 'Live',
+      image: '/images/salon.jpg',
+      link: 'https://lushlooks-salon.vercel.app/',
+      details: {
+        period: 'Jul 2025',
+        institution: 'Personal Project',
+        role: 'Front-End Developer',
+        features: [
+          'Hero, About, Services, Gallery, Booking, Contact',
+          'Detailed service menu with categories and pricing',
+          'AOS animations for smoother user experience',
+          'Fully responsive layout with lazy loading',
+          'Deployed on Vercel'
+        ]
+      }
+    }
   ];
 
   return (
