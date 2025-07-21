@@ -2,39 +2,9 @@ import { useState, useEffect} from 'react';
 import { ChevronDown, Github, Linkedin, Mail, ArrowUpRight, Star, Heart, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Calendar, School, User } from 'lucide-react';
-
-const OptimizedImage = ({ src, alt, className }) => {
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    <div className={className} style={{ position: 'relative', overflow: 'hidden' }}>
-      {!loaded && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-          opacity: 0.3
-        }} />
-      )}
-      <img
-        src={src}
-        alt={alt}
-        loading="lazy"
-        onLoad={() => setLoaded(true)}
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          transition: 'opacity 0.5s ease',
-          opacity: loaded ? 1 : 0
-        }}
-      />
-    </div>
-  );
-};
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { addDoc, collection, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
+import { db, storage } from './firebase';
 
 // ========== INTRO COMPONENT (1.5s duration) ==========
 const IntroScreen = ({ onComplete }) => {
@@ -383,34 +353,78 @@ const ServicesSection = () => {
 };
 
 // ========== UPDATED FEEDBACK COMPONENT ==========
+// ========== UPDATED FEEDBACK COMPONENT ==========
 const FeedbackWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [imageFiles, setImageFiles] = useState([]); 
+  const [images, setImages] = useState([]); 
 
-  const handleSubmit = (e) => {
+  // Define missing styles
+  const inputStyle = {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '8px',
+    padding: '12px',
+    color: 'white',
+    marginBottom: '12px'
+  };
+
+  const uploadButtonStyle = {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '8px',
+    padding: '12px',
+    color: 'white',
+    marginBottom: '12px',
+    cursor: 'pointer',
+    textAlign: 'center',
+    display: 'block'
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setImageFiles(files);
+    setImages(files.map(file => URL.createObjectURL(file)));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you would send this to your backend
-    const newFeedback = {
+    setSubmitted(true);
+
+    const uploadedImageUrls = [];
+
+    for (const file of imageFiles) {
+      const imageRef = ref(storage, `feedback-images/${Date.now()}_${file.name}`);
+      await uploadBytes(imageRef, file);
+      const url = await getDownloadURL(imageRef);
+      uploadedImageUrls.push(url);
+    }
+
+    const feedbackData = {
       name,
       email,
       feedback,
-      date: new Date().toISOString()
+      image: uploadedImageUrls,
+      date: Timestamp.now()
     };
-    
-    // Store in local storage for demo purposes
-    const existingFeedback = JSON.parse(localStorage.getItem('portfolioFeedback') || '[]');
-    localStorage.setItem('portfolioFeedback', JSON.stringify([...existingFeedback, newFeedback]));
-    
-    setSubmitted(true);
+
+    await addDoc(collection(db, 'feedbacks'), feedbackData);
+    localStorage.setItem('currentUserEmail', email);
+
     setTimeout(() => {
       setSubmitted(false);
       setIsOpen(false);
       setName('');
       setEmail('');
       setFeedback('');
+      setImages([]); // Fixed: use setImages instead of setImage
+      setImageFiles([]); // Fixed: use setImageFiles instead of setImageFile
     }, 2000);
   };
 
@@ -452,15 +466,7 @@ const FeedbackWidget = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your Name"
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    color: 'white',
-                    marginBottom: '12px'
-                  }}
+                  style={inputStyle}
                   required
                 />
                 <input
@@ -468,17 +474,47 @@ const FeedbackWidget = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your Email"
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    color: 'white',
-                    marginBottom: '12px'
-                  }}
+                  style={inputStyle}
                   required
                 />
+                <label
+                  htmlFor="image-upload"
+                  style={uploadButtonStyle}
+                >
+                  📷 Upload Images
+                </label>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+                />
+
+                {images.length > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    marginTop: '12px'
+                  }}>
+                    {images.map((src, index) => (
+                      <img
+                        key={index}
+                        src={src}
+                        alt={`preview-${index}`}
+                        style={{
+                          width: '80px',
+                          height: '80px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
                 <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
@@ -558,12 +594,29 @@ const FeedbackWidget = () => {
 // ========== FEEDBACK DISPLAY COMPONENT ==========
 const FeedbackDisplay = () => {
   const [feedbackList, setFeedbackList] = useState([]);
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
 
   useEffect(() => {
-    // Load feedback from local storage (in a real app, you'd fetch from your backend)
-    const savedFeedback = JSON.parse(localStorage.getItem('portfolioFeedback') || '[]');
-    setFeedbackList(savedFeedback);
+    const fetchFeedback = async () => {
+      const q = query(collection(db, 'feedbacks'), orderBy('date', 'desc'));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => doc.data());
+      setFeedbackList(data);
+    };
+
+    // Load current user email from localStorage
+    const storedEmail = localStorage.getItem('currentUserEmail');
+    if (storedEmail) setCurrentUserEmail(storedEmail);
+
+    fetchFeedback();
   }, []);
+
+  // 🔥 Add this inside FeedbackDisplay
+  const handleDelete = (date) => {
+    const updatedFeedback = feedbackList.filter(item => item.date !== date);
+    setFeedbackList(updatedFeedback);
+    localStorage.setItem('portfolioFeedback', JSON.stringify(updatedFeedback));
+  };
 
   return (
     <motion.section 
@@ -652,9 +705,53 @@ const FeedbackDisplay = () => {
                   </div>
                 </div>
                 <p style={{ color: '#d1d5db', lineHeight: '1.6' }}>"{item.feedback}"</p>
+
+                {item.image && Array.isArray(item.image) && item.image.length > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    marginTop: '12px'
+                  }}>
+                    {item.image.map((imageUrl, imgIndex) => (
+                      <img
+                        key={imgIndex}
+                        src={imageUrl}
+                        alt={`Feedback attachment ${imgIndex + 1}`}
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+
                 <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '16px' }}>
-                  {new Date(item.date).toLocaleDateString()}
+                  {new Date(item.date.seconds * 1000).toLocaleDateString()}
                 </p>
+
+                {/* Show delete button if logged-in user or email matches (basic check) */}
+                {item.email === currentUserEmail && (
+                  <button
+                    onClick={() => handleDelete(item.date)}
+                    style={{
+                      marginTop: '8px',
+                      backgroundColor: 'transparent',
+                      border: '1px solid #ef4444',
+                      color: '#ef4444',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
               </motion.div>
             ))}
           </motion.div>
