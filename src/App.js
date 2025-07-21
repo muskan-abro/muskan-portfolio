@@ -783,25 +783,16 @@ const Navigation = () => {
             MA
           </motion.div>
 
-          {/* Desktop Links */}
-          <div className="nav-links-desktop" style={{
-            display: 'flex',
-            gap: '32px',
-            alignItems: 'center'
-          }}>
-            <div className="nav-links" style={{
-              display: 'flex',
-              gap: '32px',
-              alignItems: 'center'
-            }}>
+          {/* Desktop Navigation */}
+          <div className=".nav-desktop">
+            <div style={{ display: 'flex', gap: '32px' }}>
               {navItems.map((item, i) => (
                 <motion.a
                   key={item}
                   href={`#${item.toLowerCase()}`}
                   style={{
                     color: '#d1d5db',
-                    textDecoration: 'none',
-                    display: window.innerWidth < 768 ? 'none' : 'block'
+                    textDecoration: 'none'
                   }}
                   whileHover={{ color: '#ffffff' }}
                   initial={{ opacity: 0, y: -10 }}
@@ -814,30 +805,31 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* "Available for work" Badge */}
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              padding: '8px 16px',
-              borderRadius: '50px',
-              fontSize: '14px',
-              color: '#d1d5db',
-              display: window.innerWidth < 768 ? 'none' : 'block'
-            }}
-          >
-            Available for work
-          </motion.div>
+          {/* Badge (desktop only) */}
+          <div className="nav-desktop">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                padding: '8px 16px',
+                borderRadius: '50px',
+                fontSize: '14px',
+                color: '#d1d5db'
+              }}
+            >
+              Available for work
+            </motion.div>
+          </div>
 
-          {/* Hamburger Icon */}
-          <div style={{ display: window.innerWidth >= 768 ? 'none' : 'block', cursor: 'pointer' }} onClick={() => setIsOpen(!isOpen)}>
+          {/* Mobile Hamburger */}
+          <div className="nav-mobile" onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
             {isOpen ? <X color="#fff" /> : <Menu color="#fff" />}
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Dropdown Menu */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -851,6 +843,7 @@ const Navigation = () => {
                 gap: '16px',
                 marginTop: '16px'
               }}
+              className="nav-mobile"
             >
               {navItems.map((item, i) => (
                 <motion.a
@@ -874,7 +867,6 @@ const Navigation = () => {
                 borderRadius: '50px',
                 fontSize: '14px',
                 color: '#d1d5db',
-                marginTop: '8px',
                 width: 'fit-content'
               }}>
                 Available for work
@@ -883,6 +875,20 @@ const Navigation = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Add the CSS for responsive hiding below */}
+      <style>
+        {`
+          @media (min-width: 768px) {
+            .nav-desktop { display: block; }
+            .nav-mobile { display: none; }
+          }
+          @media (max-width: 767px) {
+            .nav-desktop { display: none; }
+            .nav-mobile { display: block; }
+          }
+        `}
+      </style>
     </motion.nav>
   );
 };
