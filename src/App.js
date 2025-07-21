@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react';
 import { ChevronDown, Github, Linkedin, Mail, ArrowUpRight, Star, Heart, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, School, User } from 'lucide-react';
+import { Menu, X, Calendar, School, User } from 'lucide-react';
 
 const OptimizedImage = ({ src, alt, className }) => {
   const [loaded, setLoaded] = useState(false);
@@ -746,6 +746,10 @@ const bounceAnimation = {
 
 // Navigation Component
 const Navigation = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navItems = ['Work', 'About', 'Skills', 'Contact'];
+
   return (
     <motion.nav 
       initial={{ y: -100, opacity: 0 }}
@@ -763,6 +767,8 @@ const Navigation = () => {
     >
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          
+          {/* Logo */}
           <motion.div 
             whileHover={{ scale: 1.1 }}
             style={{
@@ -776,24 +782,39 @@ const Navigation = () => {
           >
             MA
           </motion.div>
-          <div style={{ display: 'flex', gap: '32px' }}>
-            {['Work', 'About', 'Skills', 'Contact'].map((item) => (
-              <motion.a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                style={{
-                  color: '#d1d5db',
-                  textDecoration: 'none'
-                }}
-                whileHover={{ color: '#ffffff' }}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 * ['Work', 'About', 'Skills', 'Contact'].indexOf(item) }}
-              >
-                {item}
-              </motion.a>
-            ))}
+
+          {/* Desktop Links */}
+          <div className="nav-links-desktop" style={{
+            display: 'flex',
+            gap: '32px',
+            alignItems: 'center'
+          }}>
+            <div className="nav-links" style={{
+              display: 'flex',
+              gap: '32px',
+              alignItems: 'center'
+            }}>
+              {navItems.map((item, i) => (
+                <motion.a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  style={{
+                    color: '#d1d5db',
+                    textDecoration: 'none',
+                    display: window.innerWidth < 768 ? 'none' : 'block'
+                  }}
+                  whileHover={{ color: '#ffffff' }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 * i }}
+                >
+                  {item}
+                </motion.a>
+              ))}
+            </div>
           </div>
+
+          {/* "Available for work" Badge */}
           <motion.div 
             whileHover={{ scale: 1.05 }}
             style={{
@@ -803,12 +824,64 @@ const Navigation = () => {
               padding: '8px 16px',
               borderRadius: '50px',
               fontSize: '14px',
-              color: '#d1d5db'
+              color: '#d1d5db',
+              display: window.innerWidth < 768 ? 'none' : 'block'
             }}
           >
             Available for work
           </motion.div>
+
+          {/* Hamburger Icon */}
+          <div style={{ display: window.innerWidth >= 768 ? 'none' : 'block', cursor: 'pointer' }} onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X color="#fff" /> : <Menu color="#fff" />}
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              style={{
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                marginTop: '16px'
+              }}
+            >
+              {navItems.map((item, i) => (
+                <motion.a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  style={{
+                    color: '#d1d5db',
+                    textDecoration: 'none',
+                    fontSize: '18px'
+                  }}
+                  whileHover={{ color: '#ffffff' }}
+                >
+                  {item}
+                </motion.a>
+              ))}
+              <div style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                padding: '8px 16px',
+                borderRadius: '50px',
+                fontSize: '14px',
+                color: '#d1d5db',
+                marginTop: '8px',
+                width: 'fit-content'
+              }}>
+                Available for work
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.nav>
   );
@@ -870,7 +943,7 @@ const HeroSection = () => {
               marginBottom: '24px'
             }}
           >
-            <span style={{ color: '#d1d5db' }}>👋 Hello, I'm</span>
+            {/* <span style={{ color: '#d1d5db' }}>👋 Hello, I'm</span> */}
           </motion.div>
           
           <motion.h1 
