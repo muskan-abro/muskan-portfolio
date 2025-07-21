@@ -352,18 +352,14 @@ const ServicesSection = () => {
   );
 };
 
-// ========== UPDATED FEEDBACK COMPONENT ==========
-// ========== UPDATED FEEDBACK COMPONENT ==========
-const FeedbackWidget = () => {
+// ========== UPDATED FEEDBACK WIDGET ==========
+const FeedbackWidget = ({ onFeedbackSubmitted }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [imageFiles, setImageFiles] = useState([]); 
-  const [images, setImages] = useState([]); 
 
-  // Define missing styles
   const inputStyle = {
     width: '100%',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -374,48 +370,24 @@ const FeedbackWidget = () => {
     marginBottom: '12px'
   };
 
-  const uploadButtonStyle = {
-    width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: '8px',
-    padding: '12px',
-    color: 'white',
-    marginBottom: '12px',
-    cursor: 'pointer',
-    textAlign: 'center',
-    display: 'block'
-  };
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setImageFiles(files);
-    setImages(files.map(file => URL.createObjectURL(file)));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
-
-    const uploadedImageUrls = [];
-
-    for (const file of imageFiles) {
-      const imageRef = ref(storage, `feedback-images/${Date.now()}_${file.name}`);
-      await uploadBytes(imageRef, file);
-      const url = await getDownloadURL(imageRef);
-      uploadedImageUrls.push(url);
-    }
 
     const feedbackData = {
       name,
       email,
       feedback,
-      image: uploadedImageUrls,
       date: Timestamp.now()
     };
 
     await addDoc(collection(db, 'feedbacks'), feedbackData);
     localStorage.setItem('currentUserEmail', email);
+
+    // Notify parent component to refresh feedback list
+    if (onFeedbackSubmitted) {
+      onFeedbackSubmitted();
+    }
 
     setTimeout(() => {
       setSubmitted(false);
@@ -423,8 +395,6 @@ const FeedbackWidget = () => {
       setName('');
       setEmail('');
       setFeedback('');
-      setImages([]); // Fixed: use setImages instead of setImage
-      setImageFiles([]); // Fixed: use setImageFiles instead of setImageFile
     }, 2000);
   };
 
@@ -477,44 +447,6 @@ const FeedbackWidget = () => {
                   style={inputStyle}
                   required
                 />
-                <label
-                  htmlFor="image-upload"
-                  style={uploadButtonStyle}
-                >
-                  📷 Upload Images
-                </label>
-                <input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  style={{ display: 'none' }}
-                />
-
-                {images.length > 0 && (
-                  <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '8px',
-                    marginTop: '12px'
-                  }}>
-                    {images.map((src, index) => (
-                      <img
-                        key={index}
-                        src={src}
-                        alt={`preview-${index}`}
-                        style={{
-                          width: '80px',
-                          height: '80px',
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255, 255, 255, 0.2)'
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
                 <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
@@ -590,33 +522,27 @@ const FeedbackWidget = () => {
   );
 };
 
-
-// ========== FEEDBACK DISPLAY COMPONENT ==========
-const FeedbackDisplay = () => {
+// ========== UPDATED FEEDBACK DISPLAY COMPONENT ==========
+const FeedbackDisplay = ({ refreshTrigger }) => {
   const [feedbackList, setFeedbackList] = useState([]);
-  const [currentUserEmail, setCurrentUserEmail] = useState('');
+
+  const fetchFeedback = async () => {
+    const q = query(collection(db, 'feedbacks'), orderBy('date', 'desc'));
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map(doc => doc.data());
+    setFeedbackList(data);
+  };
 
   useEffect(() => {
-    const fetchFeedback = async () => {
-      const q = query(collection(db, 'feedbacks'), orderBy('date', 'desc'));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => doc.data());
-      setFeedbackList(data);
-    };
-
-    // Load current user email from localStorage
-    const storedEmail = localStorage.getItem('currentUserEmail');
-    if (storedEmail) setCurrentUserEmail(storedEmail);
-
     fetchFeedback();
   }, []);
 
-  // 🔥 Add this inside FeedbackDisplay
-  const handleDelete = (date) => {
-    const updatedFeedback = feedbackList.filter(item => item.date !== date);
-    setFeedbackList(updatedFeedback);
-    localStorage.setItem('portfolioFeedback', JSON.stringify(updatedFeedback));
-  };
+  // Refresh when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger) {
+      fetchFeedback();
+    }
+  }, [refreshTrigger]);
 
   return (
     <motion.section 
@@ -631,7 +557,6 @@ const FeedbackDisplay = () => {
         <motion.div 
           initial={{ y: 30, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           style={{ textAlign: 'center', marginBottom: '64px' }}
         >
@@ -644,8 +569,7 @@ const FeedbackDisplay = () => {
             Client <span style={{
               background: 'linear-gradient(to right, #c084fc, #f472b6)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              WebkitTextFillColor: 'transparent'
             }}>Feedback</span>
           </h2>
           <p style={{
@@ -672,7 +596,7 @@ const FeedbackDisplay = () => {
           >
             {feedbackList.map((item, index) => (
               <motion.div 
-                key={index}
+                key={`${item.email}-${item.date?.seconds || index}`}
                 variants={itemVariants}
                 custom={index}
                 whileHover={{ y: -8 }}
@@ -697,61 +621,21 @@ const FeedbackDisplay = () => {
                     fontWeight: 'bold',
                     fontSize: '18px'
                   }}>
-                    {item.name.charAt(0).toUpperCase()}
+                    {item.name?.charAt(0).toUpperCase() || "?"}
                   </div>
                   <div>
                     <h3 style={{ color: 'white', marginBottom: '4px' }}>{item.name}</h3>
                     <p style={{ color: '#9ca3af', fontSize: '14px' }}>{item.email}</p>
                   </div>
                 </div>
-                <p style={{ color: '#d1d5db', lineHeight: '1.6' }}>"{item.feedback}"</p>
 
-                {item.image && Array.isArray(item.image) && item.image.length > 0 && (
-                  <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '8px',
-                    marginTop: '12px'
-                  }}>
-                    {item.image.map((imageUrl, imgIndex) => (
-                      <img
-                        key={imgIndex}
-                        src={imageUrl}
-                        alt={`Feedback attachment ${imgIndex + 1}`}
-                        style={{
-                          width: '100px',
-                          height: '100px',
-                          objectFit: 'cover',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255, 255, 255, 0.2)'
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '16px' }}>
-                  {new Date(item.date.seconds * 1000).toLocaleDateString()}
+                <p style={{ color: '#d1d5db', lineHeight: '1.6' }}>
+                  "{item.feedback}"
                 </p>
 
-                {/* Show delete button if logged-in user or email matches (basic check) */}
-                {item.email === currentUserEmail && (
-                  <button
-                    onClick={() => handleDelete(item.date)}
-                    style={{
-                      marginTop: '8px',
-                      backgroundColor: 'transparent',
-                      border: '1px solid #ef4444',
-                      color: '#ef4444',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Delete
-                  </button>
-                )}
+                <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '16px' }}>
+                  {item.date?.seconds ? new Date(item.date.seconds * 1000).toLocaleDateString() : 'N/A'}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -768,76 +652,73 @@ const FeedbackDisplay = () => {
     </motion.section>
   );
 };
-
-// Animation variants
+// ========== ANIMATION VARIANTS ==========
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
-      delayChildren: 0.3
+      delayChildren: 0.2
     }
   }
 };
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
+  hidden: { 
+    opacity: 0, 
+    y: 30 
+  },
+  visible: (index) => ({
     opacity: 1,
+    y: 0,
     transition: {
-      duration: 0.5,
+      duration: 0.6,
+      delay: index * 0.1,
       ease: "easeOut"
     }
-  }
+  })
 };
 
 const fadeInUp = {
-  hidden: { y: 30, opacity: 0 },
+  hidden: { 
+    opacity: 0, 
+    y: 50 
+  },
   visible: {
-    y: 0,
     opacity: 1,
+    y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.8,
       ease: "easeOut"
-    }
-  }
-};
-
-const floatAnimation = {
-  animate: {
-    y: [-10, 10],
-    transition: {
-      y: {
-        duration: 2,
-        repeat: Infinity,
-        repeatType: "reverse",
-        ease: "easeInOut"
-      }
     }
   }
 };
 
 const pulseAnimation = {
-  animate: {
-    opacity: [1, 0.5, 1],
-    transition: {
-      duration: 2,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }
+  scale: [1, 1.05, 1],
+  transition: {
+    duration: 2,
+    repeat: Infinity,
+    ease: "easeInOut"
   }
 };
 
 const bounceAnimation = {
-  animate: {
-    y: [0, -15, 0, -5, 0],
-    transition: {
-      duration: 1.5,
-      repeat: Infinity,
-      ease: "easeOut"
-    }
+  y: [0, -10, 0],
+  transition: {
+    duration: 1.5,
+    repeat: Infinity,
+    ease: "easeInOut"
+  }
+};
+
+const floatAnimation = {
+  y: [0, -20, 0],
+  transition: {
+    duration: 3,
+    repeat: Infinity,
+    ease: "easeInOut"
   }
 };
 
