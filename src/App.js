@@ -5,6 +5,7 @@ import { Menu, X, Calendar, School, User } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { addDoc, collection, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
 import { db, storage } from './firebase';
+import { SiBehance } from "react-icons/si";
 
 // ========== INTRO COMPONENT (1.5s duration) ==========
 const IntroScreen = ({ onComplete }) => {
@@ -102,13 +103,13 @@ const ServicesSection = () => {
     },
     {
       title: "Graphic Design",
-      description: "Creating intuitive user interfaces and seamless user experiences with a focus on accessibility and usability.",
+      description: "Creating engaging visuals, brand assets, and digital creatives to bring ideas to life.",
       image: "/images/22378646_6599112.jpg",
       highlights: [
-        "User Interface Design",
-        "User Experience Research",
-        "Wireframing & Prototyping",
-        "Design Systems"
+        "Brand Identity Design",
+        "Marketing Collaterals",
+        "Logo & Poster Design",
+        "Social Media Creatives"
       ],
       examples: [
         { 
@@ -119,7 +120,8 @@ const ServicesSection = () => {
           name: "Logo Design", 
           image: "/images/Solh - Logo-04.jpg" 
         }
-      ]
+      ],
+      behanceLink: "https://www.behance.net/muskanabro"
     },
   ];
 
@@ -243,106 +245,100 @@ const ServicesSection = () => {
                   ))}
                 </ul>
 
-                {service.render ? (
-                  service.render(service)
-                ) : (
-                  <div style={{ marginTop: '32px' }}>
-                    <h4 style={{ 
-                      color: '#9ca3af', 
-                      marginBottom: '16px',
-                      fontSize: '14px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
-                    }}>
-                      {service.designs ? 'My Design Work' : 'My Work'}
-                    </h4>
-                    <div style={{
-                      display: 'flex',
-                      gap: '16px',
-                      flexWrap: 'wrap'
-                    }}>
-                      {service.examples ? (
-                        service.examples.map((example, i) => (
-                          <motion.div
-                            key={i}
-                            whileHover={{ y: -5 }}
-                            style={{
-                              width: '80px',
-                              height: '80px',
-                              borderRadius: '8px',
-                              overflow: 'hidden',
-                              position: 'relative',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            <img 
-                              src={example.image} 
-                              alt={example.name}
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                              }}
-                            />
-                            <div style={{
-                              position: 'absolute',
-                              inset: 0,
-                              background: 'rgba(0,0,0,0.4)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontSize: '12px',
-                              textAlign: 'center',
-                              padding: '8px',
-                              opacity: 0,
-                              transition: 'opacity 0.3s ease'
-                            }}>
-                              {example.name}
-                            </div>
-                          </motion.div>
-                        ))
-                      ) : (
-                        service.designs.map((design, i) => (
-                          <motion.div
-                            key={i}
-                            whileHover={{ scale: 1.05 }}
-                            style={{
-                              width: '80px',
-                              height: '80px',
-                              borderRadius: '8px',
-                              overflow: 'hidden',
-                              position: 'relative',
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                            }}
-                          >
-                            <img 
-                              src={design.image} 
-                              alt={design.title}
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                              }}
-                            />
-                            <div style={{
-                              position: 'absolute',
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-                              padding: '8px',
-                              color: 'white',
-                              fontSize: '10px'
-                            }}>
-                              {design.title}
-                            </div>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
+                <div style={{ marginTop: '32px' }}>
+                  <h4 style={{ 
+                    color: '#9ca3af', 
+                    marginBottom: '16px',
+                    fontSize: '14px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    {service.designs ? 'My Design Work' : 'My Work'}
+                  </h4>
+
+                  <div style={{
+                    display: 'flex',
+                    gap: '16px',
+                    flexWrap: 'wrap'
+                  }}>
+                    {service.examples && service.examples.map((example, i) => (
+                      <motion.div
+                        key={i}
+                        whileHover={{ y: -5 }}
+                        style={{
+                          width: '80px',
+                          height: '80px',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <img 
+                          src={example.image} 
+                          alt={example.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                        <div style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'rgba(0,0,0,0.4)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontSize: '12px',
+                          textAlign: 'center',
+                          padding: '8px',
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
+                        }}>
+                          {example.name}
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
-                )}
+
+                  {/* Premium Behance Button */}
+                  {service.behanceLink && (
+                    <a 
+                      href={service.behanceLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: '24px',
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #0057FF, #4D8BFF)',
+                        color: '#fff',
+                        fontWeight: '600',
+                        textDecoration: 'none',
+                        fontSize: '15px',
+                        boxShadow: '0 8px 24px rgba(0, 87, 255, 0.35)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.1)';
+                        e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 87, 255, 0.5)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 87, 255, 0.35)';
+                      }}
+                    >
+                      <SiBehance size={22} />
+                    </a>
+                  )}
+
+                </div>
               </div>
             </motion.div>
           ))}
@@ -722,11 +718,17 @@ const floatAnimation = {
   }
 };
 
-// Navigation Component
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navItems = ['Work', 'About', 'Skills', 'Contact'];
+  // Updated navItems array with external link for Designs
+  const navItems = [
+    { name: 'Work', link: '#work', external: false },
+    { name: 'Designs', link: '/designs.html', external: true },
+    { name: 'About', link: '#about', external: false },
+    { name: 'Skills', link: '#skills', external: false },
+    { name: 'Contact', link: '#contact', external: false }
+  ];
 
   return (
     <motion.nav 
@@ -746,7 +748,7 @@ const Navigation = () => {
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           
-          {/* Logo */}
+          {/* Logo - unchanged */}
           <motion.div 
             whileHover={{ scale: 1.1 }}
             style={{
@@ -761,29 +763,48 @@ const Navigation = () => {
             MA
           </motion.div>
 
-          {/* Desktop Navigation */}
-          <div className=".nav-desktop">
+          {/* Desktop Navigation - updated */}
+          <div className="nav-desktop">
             <div style={{ display: 'flex', gap: '32px' }}>
               {navItems.map((item, i) => (
-                <motion.a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  style={{
-                    color: '#d1d5db',
-                    textDecoration: 'none'
-                  }}
-                  whileHover={{ color: '#ffffff' }}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 * i }}
-                >
-                  {item}
-                </motion.a>
+                item.external ? (
+                  <motion.a
+                    key={item.name}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#d1d5db',
+                      textDecoration: 'none'
+                    }}
+                    whileHover={{ color: '#ffffff' }}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 * i }}
+                  >
+                    {item.name}
+                  </motion.a>
+                ) : (
+                  <motion.a
+                    key={item.name}
+                    href={item.link}
+                    style={{
+                      color: '#d1d5db',
+                      textDecoration: 'none'
+                    }}
+                    whileHover={{ color: '#ffffff' }}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 * i }}
+                  >
+                    {item.name}
+                  </motion.a>
+                )
               ))}
             </div>
           </div>
 
-          {/* Badge (desktop only) */}
+          {/* Badge (desktop only) - unchanged */}
           <div className="nav-desktop">
             <motion.div 
               whileHover={{ scale: 1.05 }}
@@ -801,13 +822,13 @@ const Navigation = () => {
             </motion.div>
           </div>
 
-          {/* Mobile Hamburger */}
+          {/* Mobile Hamburger - unchanged */}
           <div className="nav-mobile" onClick={() => setIsOpen(!isOpen)} style={{ cursor: 'pointer' }}>
             {isOpen ? <X color="#fff" /> : <Menu color="#fff" />}
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile Dropdown Menu - updated */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -824,18 +845,35 @@ const Navigation = () => {
               className="nav-mobile"
             >
               {navItems.map((item, i) => (
-                <motion.a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  style={{
-                    color: '#d1d5db',
-                    textDecoration: 'none',
-                    fontSize: '18px'
-                  }}
-                  whileHover={{ color: '#ffffff' }}
-                >
-                  {item}
-                </motion.a>
+                item.external ? (
+                  <motion.a
+                    key={item.name}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#d1d5db',
+                      textDecoration: 'none',
+                      fontSize: '18px'
+                    }}
+                    whileHover={{ color: '#ffffff' }}
+                  >
+                    {item.name}
+                  </motion.a>
+                ) : (
+                  <motion.a
+                    key={item.name}
+                    href={item.link}
+                    style={{
+                      color: '#d1d5db',
+                      textDecoration: 'none',
+                      fontSize: '18px'
+                    }}
+                    whileHover={{ color: '#ffffff' }}
+                  >
+                    {item.name}
+                  </motion.a>
+                )
               ))}
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -854,7 +892,7 @@ const Navigation = () => {
         </AnimatePresence>
       </div>
 
-      {/* Add the CSS for responsive hiding below */}
+      {/* Responsive CSS - unchanged */}
       <style>
         {`
           @media (min-width: 768px) {
@@ -870,6 +908,7 @@ const Navigation = () => {
     </motion.nav>
   );
 };
+
 
 // Hero Section Component
 const HeroSection = () => {
@@ -1876,7 +1915,7 @@ export default function Portfolio() {
 
           <Navigation />
           <HeroSection />
-          <ServicesSection /> {/* Add this new section right after Hero */}
+          <ServicesSection />
           <ProjectsSection />
           <SkillsSection />
           <AboutSection />
