@@ -1202,26 +1202,26 @@ const ProjectsSection = () => {
         ]
       }
     },
-    // {
-    //   title: 'Vanity Salon & Spa - WordPress Website',
-    //   description: 'Professional website for a premium salon & spa, featuring service listings, online booking, and gallery showcase.',
-    //   tech: ['WordPress', 'Elementor', 'WooCommerce', 'PHP'],
-    //   status: 'Live',
-    //   image: '/images/WhatsApp Image 2024-10-26 at 8.06.39 PM.jpeg',
-    //   link: 'https://www.vanitysalons.pk/',
-    //   details: {
-    //     period: '2023',
-    //     institution: 'Karachi | Lahore | Faisalabad',
-    //     role: 'Designer',
-    //     features: [
-    //       'Responsive design',
-    //       'Service catalog',
-    //       'Online booking system',
-    //       'Gallery showcase',
-    //       'Contact forms'
-    //     ]
-    //   }
-    // },
+    {
+      title: 'Vanity Salon & Spa - WordPress Website',
+      description: 'Professional website for a premium salon & spa, featuring service listings, online booking, and gallery showcase.',
+      tech: ['WordPress', 'Elementor', 'WooCommerce', 'PHP'],
+      status: 'Live',
+      image: '/images/WhatsApp Image 2024-10-26 at 8.06.39 PM.jpeg',
+      link: 'https://www.vanitysalons.pk/',
+      details: {
+        period: '2023',
+        institution: 'Karachi | Lahore | Faisalabad',
+        role: 'Designer',
+        features: [
+          'Responsive design',
+          'Service catalog',
+          'Online booking system',
+          'Gallery showcase',
+          'Contact forms'
+        ]
+      }
+    },
     {
       title: 'Lush Looks Salon - React Website',
       description: 'A responsive and fully animated salon website built with React and CSS Modules. Includes booking, service menu, testimonials, and smooth scroll animations.',
